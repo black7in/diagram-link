@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\RoomController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -9,3 +10,11 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+Route::get('rooms', [RoomController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('rooms');
+
+Route::get('/rooms/{uuid}', [RoomController::class, 'show'])
+    ->middleware(['auth', 'verified'])
+    ->name('rooms.show');
