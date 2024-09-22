@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('rooms', function (Blueprint $table) {
             $table->id();
             $table->string('name'); // Nombre de la sala
+            $table->text('description')->nullable(); // Descripción de la sala
             $table->string('uuid')->unique(); // UUID para compartir la sala
             $table->foreignId('user_id')->constrained();
             $table->timestamps();

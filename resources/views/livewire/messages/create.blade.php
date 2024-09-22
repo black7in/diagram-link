@@ -55,8 +55,10 @@ new class extends Component {
                 </div>
             @enderror
         </div>
-        <button type="submit" class="btn btn-primary mt-4">
-            {{ __('Enviar Mensaje') }}
-        </button>
+        <div class="d-flex justify-content-center w-100">
+            <button type="submit" class="btn btn-dark mt-3">
+                <i class="fas fa-paper-plane"></i> {{ __('Enviar') }}
+            </button>
+        </div>
     </form>
 </div>

@@ -42,12 +42,50 @@ class DatabaseSeeder extends Seeder
         //Crer room
         Room::create([
             'name' => 'Room 1',
+            'description' => 'Room 1 description',
             'user_id' => 1,
             'uuid' => Str::uuid(),
         ]);
 
         Room::create([
             'name' => 'Room 2',
+            'description' => 'Room 2 description',
+            'user_id' => 1,
+            'uuid' => Str::uuid(),
+        ]);
+
+        Room::create([
+            'name' => 'Room 3',
+            'description' => 'Room 3 description',
+            'user_id' => 2,
+            'uuid' => Str::uuid(),
+        ]);
+
+        Room::create([
+            'name' => 'Room 4',
+            'description' => 'Room 4 description',
+            'user_id' => 2,
+            'uuid' => Str::uuid(),
+        ]);
+
+        // mas salas
+        Room::create([
+            'name' => 'Room 5',
+            'description' => 'Room 5 description',
+            'user_id' => 1,
+            'uuid' => Str::uuid(),
+        ]);
+
+        Room::create([
+            'name' => 'Room 6',
+            'description' => 'Room 6 description',
+            'user_id' => 1,
+            'uuid' => Str::uuid(),
+        ]);
+
+        Room::create([
+            'name' => 'Room 7',
+            'description' => 'Room 7 description',
             'user_id' => 1,
             'uuid' => Str::uuid(),
         ]);
