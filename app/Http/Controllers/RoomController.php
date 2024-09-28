@@ -17,13 +17,9 @@ class RoomController extends Controller
 
     public function index(): View
     {
-
-
         $message = "Hello World";
 
-
         $rooms = Room::where('user_id', Auth::id())->get();
-
 
         return view('rooms', [
             'message' => $message,
@@ -62,6 +58,20 @@ class RoomController extends Controller
         $room->save();
 
         // Redireccionar a la sala creada
+        return redirect()->route('rooms.show', $room->uuid);
+    }
+
+    public function joinRoom($uuid)
+    {
+        $room = Room::where('uuid', $uuid)->firstOrFail();
+        $user = Auth::user();
+
+        // Verificar si el usuario ya está en la sala
+        if (!$room->users->contains($user->id)) {
+            // Asociar el usuario a la sala
+            $room->users()->attach($user->id);
+        }
+
         return redirect()->route('rooms.show', $room->uuid);
     }
 }

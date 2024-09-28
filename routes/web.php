@@ -22,3 +22,5 @@ Route::get('/rooms/{uuid}', [RoomController::class, 'show'])
 Route::post('rooms', [RoomController::class, 'store'])
     ->middleware(['auth', 'verified'])
     ->name('rooms.store');
+
+//Route::get('/rooms/{uuid}/join', [RoomController::class, 'joinRoom'])->name('rooms.join');

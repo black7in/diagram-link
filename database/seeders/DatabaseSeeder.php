@@ -8,7 +8,6 @@ use Illuminate\Database\Seeder;
 use App\Models\Room;
 use Illuminate\Support\Str;
 
-
 class DatabaseSeeder extends Seeder
 {
     /**
