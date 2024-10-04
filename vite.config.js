@@ -7,6 +7,8 @@ export default defineConfig({
             input: [
                 'resources/sass/app.scss',
                 'resources/js/app.js',
+                'resources/js/game/game.js', // Agrega tu script aquí
+                'resources/css/game.css' // Archivo CSS personalizado
             ],
             refresh: true,
         }),

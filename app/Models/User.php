@@ -44,4 +44,15 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    // Un usuario puede tener muchos mensajes
+    public function messages()
+    {
+        return $this->hasMany(Message::class);
+    }
+
+    public function rooms()
+    {
+        return $this->belongsToMany(Room::class)->withTimestamps();
+    }
 }
