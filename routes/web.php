@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\RoomController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TestController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -24,3 +25,6 @@ Route::post('rooms', [RoomController::class, 'store'])
     ->name('rooms.store');
 
 //Route::get('/rooms/{uuid}/join', [RoomController::class, 'joinRoom'])->name('rooms.join');
+
+Route::get('/test/', [TestController::class, 'show']);
+

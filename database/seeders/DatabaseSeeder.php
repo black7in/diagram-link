@@ -39,7 +39,7 @@ class DatabaseSeeder extends Seeder
             $table->timestamps();
         });*/
         //Crer room
-        Room::create([
+        /*Room::create([
             'name' => 'Room 1',
             'description' => 'Room 1 description',
             'user_id' => 1,
@@ -87,7 +87,7 @@ class DatabaseSeeder extends Seeder
             'description' => 'Room 7 description',
             'user_id' => 1,
             'uuid' => Str::uuid(),
-        ]);
+        ]);*/
 
         /*        Schema::create('messages', function (Blueprint $table) {
             $table->id();
@@ -99,7 +99,7 @@ class DatabaseSeeder extends Seeder
 
         // Crear mensajes
         // Mensajes para la sala 1
-        $room1 = Room::find(1);
+       /* $room1 = Room::find(1);
         $room1->messages()->create([
             'user_id' => 1,
             'message' => 'Hola, ¿cómo están?',
@@ -113,7 +113,7 @@ class DatabaseSeeder extends Seeder
         $room1->messages()->create([
             'user_id' => 1,
             'message' => 'Todo bien, gracias.',
-        ]);
+        ]);*/
         
     }
 }

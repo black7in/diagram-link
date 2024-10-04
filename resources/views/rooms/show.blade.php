@@ -23,21 +23,13 @@
         <div class="card-header">
             <nav class="navbar navbar-expand-lg navbar-light bg-light">
                 <ul class="navbar-nav">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            Archivo
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                            <li><a class="dropdown-item" href="#">Nuevo</a></li>
-                            <li><a class="dropdown-item" href="#">Abrir</a></li>
-                            <li><a class="dropdown-item" href="#">Guardar</a></li>
-                            <li><a class="dropdown-item" href="#">Exportar</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Compartir</a>
-                    </li>
+                    <li id = "" class="nav-item"><a class="nav-link" href="#"><i class="fas fa-file"></i> Nuevo</a></li>
+                    <li id = "abrirD" class="nav-item"><a class="nav-link" href="#"><i class="fas fa-folder-open"></i> Abrir</a></li>
+                    <li id = "saveDB" class="nav-item"><a class="nav-link" href="#"><i class="fas fa-save"></i> Guardar</a></li>
+                    <li id = "exportarPNG" class="nav-item"><a class="nav-link" href="#"><i class="fas fa-file-export"></i> Exportar PNG</a></li>
+                    <li id = "exportarJSON" class="nav-item"><a class="nav-link" href="#"><i class="fas fa-file-export"></i> Exportar JSON</a></li>
+                    <li id = "exportarArchitect" class="nav-item"><a class="nav-link" href="#"><i class="fas fa-file-export"></i> Exportar Architect</a></li>
+                    <li id = "" class="nav-item"><a class="nav-link" href="#"><i class="fas fa-share-alt"></i> Compartir</a></li>
                 </ul>
                 <div class="ms-auto">
                     <div class="dropdown">
@@ -65,7 +57,7 @@
         </div>
 
         <div class="card-body d-flex flex-column no-padding">
-            @livewire('game')
+            @livewire('game', ['room' => $room])
         </div>
     </div>
 

@@ -7,6 +7,7 @@ use Illuminate\View\View;
 use App\Models\Room;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use App\Models\Diagrama;
 
 
 class RoomController extends Controller
@@ -57,6 +58,26 @@ class RoomController extends Controller
         $room->user_id = Auth::id();
         $room->save();
 
+
+        // Crear nuevo Diagrama
+        $diagram = new Diagrama();
+        $diagram->room_id = (string)$room->uuid;
+        $json = '{
+            "class": "_GraphLinksModel",
+            "linkFromPortIdProperty": "fromPort",
+            "linkToPortIdProperty": "toPort",
+            "copiesArrays": true,
+            "copiesArrayObjects": true,
+            "linkCategoryProperty": "relationship",
+            "nodeDataArray": [],
+            "linkDataArray": []
+        }';
+
+        // Convertir el JSON a un array asociativo de PHP
+        $array = json_decode($json, true);
+        // Asignar el array a la propiedad del objeto
+        $diagram->diagram = $array;
+        $diagram->save();
         // Redireccionar a la sala creada
         return redirect()->route('rooms.show', $room->uuid);
     }

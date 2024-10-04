@@ -24,7 +24,12 @@ export function initializeDiagram() {
                 })
             ),
         'undoManager.isEnabled': true,
-
+        'draggingTool.dragsLink': true,
+        'draggingTool.isGridSnapEnabled': true,
+        'linkingTool.isUnconnectedLinkValid': true,
+        'linkingTool.portGravity': 20,
+        'relinkingTool.isUnconnectedLinkValid': true,
+        'relinkingTool.portGravity': 20,
     });
 }
 
@@ -37,8 +42,8 @@ export function createNodeTemplate(myContextMenu) {
         contextMenu: myContextMenu,
         selectionAdornmentTemplate: nodeSelectionAdornmentTemplate,
         mouseEnter: (e, node) => showSmallPorts(node, true),
-        mouseLeave: (e, node) => showSmallPorts(node, false)
-        /*resizable: true,
+        mouseLeave: (e, node) => showSmallPorts(node, false),
+        resizable: true,
         resizeObjectName: 'TABLE',
         resizeAdornmentTemplate: go.GraphObject.make(
             go.Adornment, 'Spot',
@@ -50,8 +55,9 @@ export function createNodeTemplate(myContextMenu) {
                 stroke: 'dodgerblue',
                 cursor: 'se-resize'
             })
-        )*/
+        )
     })
+        .bindTwoWay('location', 'location', go.Point.parse, go.Point.stringify)
         .add(
             new go.Shape({
                 fill: 'palegreen',
@@ -103,7 +109,6 @@ export function createNodeTemplate(myContextMenu) {
 }
 
 function makePort(name, spot, output, input) {
-    // the port is basically just a small transparent circle
     return new go.Shape('Circle', {
         fill: null, // not seen, by default; set to a translucent gray by showSmallPorts, defined below
         stroke: null,

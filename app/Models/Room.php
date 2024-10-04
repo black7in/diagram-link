@@ -22,9 +22,15 @@ class Room extends Model
     {
         return $this->hasMany(Message::class);
     }
-    
+
     public function users()
     {
         return $this->belongsToMany(User::class)->withTimestamps();
+    }
+
+    // Relación: una sala tiene un diagrama
+    public function diagrama()
+    {
+        return $this->hasOne(Diagrama::class, 'room_id', 'id'); // Usa 'room_id' en Diagrama y 'id' en Room
     }
 }

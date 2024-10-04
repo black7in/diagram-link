@@ -1,3 +1,70 @@
+<?php
+
+use Livewire\Volt\Component;
+use Livewire\Attributes\On;
+use App\Models\Diagrama;
+use Jantinnerezo\LivewireAlert\LivewireAlert;
+use App\Events\UpdateDiagram;
+
+new class extends Component {
+    //
+    use LivewireAlert;
+    public $room;
+    public $diagrama;
+
+    public function mount($room)
+    {
+        $this->room = $room;
+        $this->diagrama = Diagrama::where('room_id', $room->uuid)->first();
+
+        $this->dispatch('cargarDiagramaInicio', $this->diagrama->diagram);
+    }
+
+    #[On('storeDiagram')]
+    public function storeDiagram($data)
+    {
+        $id = $this->room->uuid;
+
+        Diagrama::where('room_id', $id)->update([
+            'diagram' => json_decode($data, true),
+        ]);
+
+        $this->alert('success', 'Diagrama Guardado');
+        $this->skipRender(); // Evita el renderizado después de esta llamada
+    }
+
+    #[On('updateDiagram')]
+    public function updateDiagram($data)
+    {
+        
+        $id = $this->room->uuid;
+        /*Diagrama::where('room_id', $id)->update([
+            'diagram' => json_decode($data, true),
+        ]);*/
+        broadcast(new UpdateDiagram($this->room, $data))->toOthers();
+        $this->skipRender(); // Evita el renderizado después de esta llamada
+    }
+
+    #[On('echo:room.{room.id},UpdateDiagram')]
+    public function reloadDiagram()
+    {
+        //$this->dispatch('actualizarDiagrama', $this->diagrama->diagram);
+        // enviar nuevo diagrama de bae de datos
+        //$this->diagrama = Diagrama::where('room_id', $this->room->uuid)->first();
+        $this->dispatch('actualizarDiagrama', $this->diagrama->diagram);
+        $this->skipRender(); // Evita el renderizado después de esta llamada
+    }
+
+    #[On('cargarDiagrama')]
+    public function cargarDiagrama()
+    {
+        $this->dispatch('diagramaEnviado', $this->diagrama->diagram);
+        $this->skipRender(); // Evita el renderizado después de esta llamada
+    }
+};
+
+?>
+
 <div>
     <div class="row no-gutter flex-grow-1 justify-content-center" style="height: 82vh;">
         <div class="col-md-1 d-flex no-padding" style="background-color:  #e4e7ea;">

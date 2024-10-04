@@ -14,8 +14,8 @@
                             real, junto a tu equipo, sin importar dónde se encuentren. Facilita la comunicación, acelera el
                             desarrollo y asegura que todos trabajen en la misma página.</p>
                         <div class="d-grid gap-3 d-sm-flex justify-content-sm-center justify-content-xl-start">
-                            <a class="btn btn-success btn-lg px-4 me-sm-3" href="#features">Get Started</a>
-                            <a class="btn btn-outline-dark btn-lg px-4" href="#!">
+                            <a class="btn btn-success btn-lg px-4 me-sm-3" href="{{route('rooms')}}">Empezar</a>
+                            <a class="btn btn-outline-dark btn-lg px-4" href="https://github.com/black7in/diagram-link">
                                 <i class="bi-github" role="img" aria-label="GitHub"></i>
                                 Source Code
                             </a>
