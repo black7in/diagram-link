@@ -33,19 +33,44 @@ function init(/*dataModel*/) {
         return { isTreeLink: false, fromEndSegmentLength: 0, toEndSegmentLength: 0 };
     }
 
-    // Crear un enlance Association, es un enlance que no contiene flechas
+    // Crear un enlace Association con texto
     myDiagram.linkTemplateMap.add('Association',
         new go.Link({
             ...linkStyle(),
             selectable: true,
             relinkableFrom: true,
             relinkableTo: true,
-            reshapable: true // Habilitar redimensionamiento
+            reshapable: true, // Habilitar redimensionamiento
+            contextClick: (e, link) => {
+                e.diagram.model.commit((m) => {
+                    m.set(link.data, 'text', 'Label');
+                });
+            }
         })
             .add(
-                new go.Shape()
+                new go.Shape(), // Forma del enlace
+                // the link label
+                new go.Panel('Auto', { visible: false })
+                    .bind('visible', 'text', (t) => typeof t === 'string' && t.length > 0) // solo mostrado si hay texto
+                    .add(
+                        // Un fondo blanco para la etiqueta
+                        new go.Shape('Rectangle', {
+                            fill: 'white', // Color de fondo blanco
+                            stroke: null, // Sin borde
+                            opacity: 0.5 // Opcional: ajusta la opacidad
+                        }),
+                        new go.TextBlock({
+                            name: 'LABEL',
+                            font: '9pt Figtree, sans-serif',
+                            margin: 3,
+                            editable: true
+                        })
+                            .theme('stroke', 'bgText')
+                            .bindTwoWay('text')
+                    )
             )
     );
+
 
     // Crear enlace Directed Association, es un enlace que contiene una flecha abierta en el extremo del destino
     myDiagram.linkTemplateMap.add('DirectedAssociation',
@@ -54,11 +79,35 @@ function init(/*dataModel*/) {
             selectable: true,
             relinkableFrom: true,
             relinkableTo: true,
-            reshapable: true // Habilitar redimensionamiento
+            reshapable: true, // Habilitar redimensionamiento
+            contextClick: (e, link) => {
+                e.diagram.model.commit((m) => {
+                    m.set(link.data, 'text', 'Label');
+                });
+            }
         })
             .add(
                 new go.Shape(),
-                new go.Shape({ toArrow: 'OpenTriangle' })
+                new go.Shape({ toArrow: 'OpenTriangle' }),
+                // the link label
+                new go.Panel('Auto', { visible: false })
+                    .bind('visible', 'text', (t) => typeof t === 'string' && t.length > 0) // solo mostrado si hay texto
+                    .add(
+                        // Un fondo blanco para la etiqueta
+                        new go.Shape('Rectangle', {
+                            fill: 'white', // Color de fondo blanco
+                            stroke: null, // Sin borde
+                            opacity: 0.5 // Opcional: ajusta la opacidad
+                        }),
+                        new go.TextBlock({
+                            name: 'LABEL',
+                            font: '9pt Figtree, sans-serif',
+                            margin: 3,
+                            editable: true
+                        })
+                            .theme('stroke', 'bgText')
+                            .bindTwoWay('text')
+                    )
             )
     );
 
@@ -69,12 +118,36 @@ function init(/*dataModel*/) {
             selectable: true,
             relinkableFrom: true,
             relinkableTo: true,
-            reshapable: true // Habilitar redimensionamiento
+            reshapable: true, // Habilitar redimensionamiento
+            contextClick: (e, link) => {
+                e.diagram.model.commit((m) => {
+                    m.set(link.data, 'text', 'Label');
+                });
+            }
         })
             .add(
                 new go.Shape(),
                 new go.Shape({ fromArrow: 'StretchedDiamond', fill: 'white', scale: 1.3 }),
-                new go.Shape({ toArrow: 'OpenTriangle' })
+                new go.Shape({ toArrow: 'OpenTriangle' }),
+                // the link label
+                new go.Panel('Auto', { visible: false })
+                    .bind('visible', 'text', (t) => typeof t === 'string' && t.length > 0) // solo mostrado si hay texto
+                    .add(
+                        // Un fondo blanco para la etiqueta
+                        new go.Shape('Rectangle', {
+                            fill: 'white', // Color de fondo blanco
+                            stroke: null, // Sin borde
+                            opacity: 0.5 // Opcional: ajusta la opacidad
+                        }),
+                        new go.TextBlock({
+                            name: 'LABEL',
+                            font: '9pt Figtree, sans-serif',
+                            margin: 3,
+                            editable: true
+                        })
+                            .theme('stroke', 'bgText')
+                            .bindTwoWay('text')
+                    )
             )
     );
 
@@ -85,12 +158,36 @@ function init(/*dataModel*/) {
             selectable: true,
             relinkableFrom: true,
             relinkableTo: true,
-            reshapable: true // Habilitar redimensionamiento
+            reshapable: true, // Habilitar redimensionamiento
+            contextClick: (e, link) => {
+                e.diagram.model.commit((m) => {
+                    m.set(link.data, 'text', 'Label');
+                });
+            }
         })
             .add(
                 new go.Shape(),
                 new go.Shape({ fromArrow: 'StretchedDiamond', scale: 1.3 }),
-                new go.Shape({ toArrow: 'OpenTriangle' })
+                new go.Shape({ toArrow: 'OpenTriangle' }),
+                // the link label
+                new go.Panel('Auto', { visible: false })
+                    .bind('visible', 'text', (t) => typeof t === 'string' && t.length > 0) // solo mostrado si hay texto
+                    .add(
+                        // Un fondo blanco para la etiqueta
+                        new go.Shape('Rectangle', {
+                            fill: 'white', // Color de fondo blanco
+                            stroke: null, // Sin borde
+                            opacity: 0.5 // Opcional: ajusta la opacidad
+                        }),
+                        new go.TextBlock({
+                            name: 'LABEL',
+                            font: '9pt Figtree, sans-serif',
+                            margin: 3,
+                            editable: true
+                        })
+                            .theme('stroke', 'bgText')
+                            .bindTwoWay('text')
+                    )
             )
     );
 
@@ -101,11 +198,35 @@ function init(/*dataModel*/) {
             selectable: true,
             relinkableFrom: true,
             relinkableTo: true,
-            reshapable: true // Habilitar redimensionamiento
+            reshapable: true, // Habilitar redimensionamiento
+            contextClick: (e, link) => {
+                e.diagram.model.commit((m) => {
+                    m.set(link.data, 'text', 'Label');
+                });
+            }
         })
             .add(
                 new go.Shape({ strokeDashArray: [3, 2] }),
-                new go.Shape({ toArrow: 'OpenTriangle' })
+                new go.Shape({ toArrow: 'OpenTriangle' }),
+                // the link label
+                new go.Panel('Auto', { visible: false })
+                    .bind('visible', 'text', (t) => typeof t === 'string' && t.length > 0) // solo mostrado si hay texto
+                    .add(
+                        // Un fondo blanco para la etiqueta
+                        new go.Shape('Rectangle', {
+                            fill: 'white', // Color de fondo blanco
+                            stroke: null, // Sin borde
+                            opacity: 0.5 // Opcional: ajusta la opacidad
+                        }),
+                        new go.TextBlock({
+                            name: 'LABEL',
+                            font: '9pt Figtree, sans-serif',
+                            margin: 3,
+                            editable: true
+                        })
+                            .theme('stroke', 'bgText')
+                            .bindTwoWay('text')
+                    )
             )
     );
 
@@ -116,11 +237,35 @@ function init(/*dataModel*/) {
             selectable: true,
             relinkableFrom: true,
             relinkableTo: true,
-            reshapable: true // Habilitar redimensionamiento
+            reshapable: true, // Habilitar redimensionamiento
+            contextClick: (e, link) => {
+                e.diagram.model.commit((m) => {
+                    m.set(link.data, 'text', 'Label');
+                });
+            }
         })
             .add(
                 new go.Shape(),
-                new go.Shape({ toArrow: 'Triangle', fill: 'white' })
+                new go.Shape({ toArrow: 'Triangle', fill: 'white' }),
+                // the link label
+                new go.Panel('Auto', { visible: false })
+                    .bind('visible', 'text', (t) => typeof t === 'string' && t.length > 0) // solo mostrado si hay texto
+                    .add(
+                        // Un fondo blanco para la etiqueta
+                        new go.Shape('Rectangle', {
+                            fill: 'white', // Color de fondo blanco
+                            stroke: null, // Sin borde
+                            opacity: 0.5 // Opcional: ajusta la opacidad
+                        }),
+                        new go.TextBlock({
+                            name: 'LABEL',
+                            font: '9pt Figtree, sans-serif',
+                            margin: 3,
+                            editable: true
+                        })
+                            .theme('stroke', 'bgText')
+                            .bindTwoWay('text')
+                    )
             )
     );
 
@@ -130,24 +275,41 @@ function init(/*dataModel*/) {
             selectable: true,
             relinkableFrom: true,
             relinkableTo: true,
-            reshapable: true // Habilitar redimensionamiento
+            reshapable: true, // Habilitar redimensionamiento
+            contextClick: (e, link) => {
+                e.diagram.model.commit((m) => {
+                    m.set(link.data, 'text', 'Label');
+                });
+            }
         })
             .add(
                 new go.Shape({ strokeDashArray: [3, 2] }),
-                new go.Shape({ toArrow: 'Triangle', fill: 'white' })
+                new go.Shape({ toArrow: 'Triangle', fill: 'white' }),
+                // the link label
+                new go.Panel('Auto', { visible: false })
+                    .bind('visible', 'text', (t) => typeof t === 'string' && t.length > 0) // solo mostrado si hay texto
+                    .add(
+                        // Un fondo blanco para la etiqueta
+                        new go.Shape('Rectangle', {
+                            fill: 'white', // Color de fondo blanco
+                            stroke: null, // Sin borde
+                            opacity: 0.5 // Opcional: ajusta la opacidad
+                        }),
+                        new go.TextBlock({
+                            name: 'LABEL',
+                            font: '9pt Figtree, sans-serif',
+                            margin: 3,
+                            editable: true
+                        })
+                            .theme('stroke', 'bgText')
+                            .bindTwoWay('text')
+                    )
             )
     );
 
     // Plantilla para los enlaces de la paleta
     myPalette.linkTemplate = new go.Link({
         locationSpot: go.Spot.Center,  // Ubicación del enlace en la paleta
-        selectionAdornmentTemplate: new go.Adornment('Link', {
-            locationSpot: go.Spot.Center
-        })
-            .add(
-                new go.Shape({ isPanelMain: true, stroke: 'deepskyblue', strokeWidth: 2 }),  // Línea del enlace
-                new go.Shape({ toArrow: 'Standard', stroke: null })  // Flecha del enlace
-            ),
         routing: go.Routing.AvoidsNodes,  // Evitar los nodos
         curve: go.Curve.JumpOver,  // Curvatura con salto sobre otros enlaces
         corner: 5,
@@ -159,8 +321,129 @@ function init(/*dataModel*/) {
             new go.Shape({ toArrow: 'Standard', stroke: null })  // Flecha del enlace
         );
 
-    //myPalette.linkTemplateMap = myDiagram.linkTemplateMap;
+
+    // Crear un enlace Association con texto
+    myPalette.linkTemplateMap.add('Association',
+        new go.Link({
+            ...linkStyle(),
+            selectable: true,
+            relinkableFrom: true,
+            relinkableTo: true,
+            reshapable: true, // Habilitar redimensionamient
+        })
+            .bind('points')
+            .add(
+                new go.Shape(), // Forma del enlace
+            )
+    );
+
+    // Crear enlace Directed Association, es un enlace que contiene una flecha abierta en el extremo del destino
+    myPalette.linkTemplateMap.add('DirectedAssociation',
+        new go.Link({
+            ...linkStyle(),
+            selectable: true,
+            relinkableFrom: true,
+            relinkableTo: true,
+            reshapable: true, // Habilitar redimensionamiento
+
+        })
+            .bind('points')
+
+            .add(
+                new go.Shape(),
+                new go.Shape({ toArrow: 'OpenTriangle' }),
+            )
+    );
+
+    // Crear enlace Aggregation, es un enlace que contiene una flecha de diamante en el extremo del origen
+    myPalette.linkTemplateMap.add('Aggregation',
+        new go.Link({
+            ...linkStyle(),
+            selectable: true,
+            relinkableFrom: true,
+            relinkableTo: true,
+            reshapable: true, // Habilitar redimensionamiento
+        })
+            .bind('points')
+
+            .add(
+                new go.Shape(),
+                new go.Shape({ fromArrow: 'StretchedDiamond', fill: 'white', scale: 1.3 }),
+                new go.Shape({ toArrow: 'OpenTriangle' }),
+            )
+    );
+
+    // Crear enlace Composition, es un enlace que contiene una flecha de diamante oscuro en el extremo del origen
+    myPalette.linkTemplateMap.add('Composition',
+        new go.Link({
+            ...linkStyle(),
+            selectable: true,
+            relinkableFrom: true,
+            relinkableTo: true,
+            reshapable: true, // Habilitar redimensionamiento
+        })
+            .bind('points')
+
+            .add(
+                new go.Shape(),
+                new go.Shape({ fromArrow: 'StretchedDiamond', scale: 1.3 }),
+                new go.Shape({ toArrow: 'OpenTriangle' }),
+            )
+    );
+
+    // Crear enlace Dependency, es un enlace punteado que contiene una flecha de punta abierta en el extremo del destino
+    myPalette.linkTemplateMap.add('Dependency',
+        new go.Link({
+            ...linkStyle(),
+            selectable: true,
+            relinkableFrom: true,
+            relinkableTo: true,
+            reshapable: true, // Habilitar redimensionamiento
+        })
+            .bind('points')
+
+            .add(
+                new go.Shape({ strokeDashArray: [3, 2] }),
+                new go.Shape({ toArrow: 'OpenTriangle' }),
+            )
+    );
+
+    // Crear enlace Generalization, es un enlace que contiene una flecha de punta abierta en el extremo del destino
+    myPalette.linkTemplateMap.add('Generalization',
+        new go.Link({
+            ...linkStyle(),
+            selectable: true,
+            relinkableFrom: true,
+            relinkableTo: true,
+            reshapable: true, // Habilitar redimensionamiento
+        })
+            .bind('points')
+
+            .add(
+                new go.Shape(),
+                new go.Shape({ toArrow: 'Triangle', fill: 'white' }),
+            )
+    );
+
+    myPalette.linkTemplateMap.add('Realization',
+        new go.Link({
+            ...linkStyle(),
+            selectable: true,
+            relinkableFrom: true,
+            relinkableTo: true,
+            reshapable: true, // Habilitar redimensionamiento
+        })
+            .bind('points')
+
+            .add(
+                new go.Shape({ strokeDashArray: [3, 2] }),
+                new go.Shape({ toArrow: 'Triangle', fill: 'white' }),
+            )
+    );
+
+
     myPalette.model.linkCategoryProperty = "relationship";  // Esto es correcto
+
 
 
     // Luego agregas los enlaces al modelo de la paleta
@@ -171,23 +454,14 @@ function init(/*dataModel*/) {
         ],
         [
             // Definición de los diferentes tipos de enlaces en la paleta
-            { relationship: 'Association', points: new go.List().addAll([new go.Point(0, 0), new go.Point(60, 40)]) },
-            { relationship: 'DirectedAssociation', points: new go.List().addAll([new go.Point(0, 0), new go.Point(60, 40)]) },
-            { relationship: 'Aggregation', points: new go.List().addAll([new go.Point(0, 0), new go.Point(60, 40)]) },
-            { relationship: 'Composition', points: new go.List().addAll([new go.Point(0, 0), new go.Point(60, 40)]) },
-            { relationship: 'Dependency', points: new go.List().addAll([new go.Point(0, 0), new go.Point(60, 40)]) },
-            { relationship: 'Generalization', points: new go.List().addAll([new go.Point(0, 0), new go.Point(60, 40)]) },
+            { category: 'Association', relationship: 'Association', points: new go.List().addAll([new go.Point(0, 0), new go.Point(60, 40)]) },
+            { category: 'DirectedAssociation', relationship: 'DirectedAssociation', points: new go.List().addAll([new go.Point(0, 0), new go.Point(60, 40)]) },
+            { category: 'Aggregation', relationship: 'Aggregation', points: new go.List().addAll([new go.Point(0, 0), new go.Point(60, 40)]) },
+            { category: 'Composition', relationship: 'Composition', points: new go.List().addAll([new go.Point(0, 0), new go.Point(60, 40)]) },
+            { category: 'Dependency', relationship: 'Dependency', points: new go.List().addAll([new go.Point(0, 0), new go.Point(60, 40)]) },
+            { category: 'Generalization', relationship: 'Generalization', points: new go.List().addAll([new go.Point(0, 0), new go.Point(60, 40)]) },
         ]
     );
-
-
-    /*myDiagram.model = new go.GraphLinksModel({
-        copiesArrays: true,
-        copiesArrayObjects: true,
-        linkCategoryProperty: 'relationship',
-        nodeDataArray: nodedata,
-        linkDataArray: linkdata
-    });*/
 
     // We don't want the div acting as a context menu to have a (browser) context menu!
     cxElement.addEventListener(
@@ -213,7 +487,6 @@ function init(/*dataModel*/) {
     myDiagram.toolManager.linkingTool.archetypeLinkData = {
         relationship: selectedLinkType  // Usa la categoría seleccionada para el tipo de relación
     };
-
 }
 
 function hideCX() {
