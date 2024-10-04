@@ -38,9 +38,9 @@ new class extends Component {
     {
         
         $id = $this->room->uuid;
-        /*Diagrama::where('room_id', $id)->update([
+        Diagrama::where('room_id', $id)->update([
             'diagram' => json_decode($data, true),
-        ]);*/
+        ]);
         broadcast(new UpdateDiagram($this->room, $data))->toOthers();
         $this->skipRender(); // Evita el renderizado después de esta llamada
     }
