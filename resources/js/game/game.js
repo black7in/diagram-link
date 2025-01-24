@@ -4,7 +4,7 @@ import { nodedata } from './data.js';
 
 import { jsonToUmlXml, descargarArchivoXMI } from './helpers.js';
 
-import { exportXML } from './xmlExport.js';
+import { downloadXML, generateXML } from './xmlExport.js';
 
 let myDiagram;
 let myPalette;
@@ -825,7 +825,8 @@ function exportarArchitect() {
     //var json = myDiagram.model.toJson();
     const json = JSON.parse(myDiagram.model.toJson());
     //descargarArchivoXMI(json);
-    exportXML(json);
+    const xmlOutput = generateXML(json);
+    downloadXML("classes.xml", xmlOutput);
 
     return;
     var xml = jsonToUmlXml(json);
