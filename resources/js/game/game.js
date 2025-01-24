@@ -2,7 +2,9 @@ import { cxcommand } from './commands.js';
 import { initializeDiagram, createNodeTemplate } from './diagram.js';
 import { nodedata } from './data.js';
 
-import { jsonToUmlXml } from './helpers.js';
+import { jsonToUmlXml, descargarArchivoXMI } from './helpers.js';
+
+import { exportXML } from './xmlExport.js';
 
 let myDiagram;
 let myPalette;
@@ -30,417 +32,638 @@ function init(/*dataModel*/) {
     myPalette.contentAlignment = go.Spot.Center;
 
     function linkStyle() {
-        return { isTreeLink: false, fromEndSegmentLength: 0, toEndSegmentLength: 0 };
+        return { isTreeLink: false, fromEndSegmentLength: 0, toEndSegmentLength: 0, };
     }
 
     // Crear un enlace Association con texto
+    // Asociación
     myDiagram.linkTemplateMap.add('Association',
         new go.Link({
+            reshapable: true,
+            resegmentable: true,
             ...linkStyle(),
             selectable: true,
             relinkableFrom: true,
             relinkableTo: true,
-            reshapable: true, // Habilitar redimensionamiento
-            contextClick: (e, link) => {
-                e.diagram.model.commit((m) => {
-                    m.set(link.data, 'text', 'Label');
-                });
-            }
+
         })
             .add(
-                new go.Shape(), // Forma del enlace
-                // the link label
-                new go.Panel('Auto', { visible: false })
-                    .bind('visible', 'text', (t) => typeof t === 'string' && t.length > 0) // solo mostrado si hay texto
-                    .add(
-                        // Un fondo blanco para la etiqueta
-                        new go.Shape('Rectangle', {
-                            fill: 'white', // Color de fondo blanco
-                            stroke: null, // Sin borde
-                            opacity: 0.5 // Opcional: ajusta la opacidad
-                        }),
-                        new go.TextBlock({
-                            name: 'LABEL',
-                            font: '9pt Figtree, sans-serif',
-                            margin: 3,
-                            editable: true
-                        })
-                            .theme('stroke', 'bgText')
-                            .bindTwoWay('text')
-                    )
+                new go.Shape({
+                    stroke: 'black',
+                    strokeWidth: 2,
+                }),
+            )
+            // Multiplicidad en el extremo "from"
+            .add(
+                new go.TextBlock({
+                    text: '1', // Valor inicial de multiplicidad
+                    segmentIndex: 0, // Inicio del enlace
+                    segmentOffset: new go.Point(15, -10), // Ajusta la posición
+                    font: '10pt sans-serif',
+                    editable: true, // Permite editar en el diagrama
+                }).bind(new go.Binding('text', 'fromMultiplicity').makeTwoWay()),
+            )
+            // Multiplicidad en el extremo "to"
+            .add(
+                new go.TextBlock({
+                    text: '1', // Valor inicial de multiplicidad
+                    segmentIndex: -1, // Fin del enlace
+                    segmentOffset: new go.Point(-15, -10), // Ajusta la posición
+                    font: '10pt sans-serif',
+                    editable: true, // Permite editar en el diagrama
+                }).bind(new go.Binding('text', 'toMultiplicity').makeTwoWay()),
+            )
+            // Nombre en el centro del enlace
+            .add(
+                new go.TextBlock({
+                    text: 'Relation', // Valor inicial del nombre
+                    segmentFraction: 0.5, // Posición en el centro del enlace
+                    segmentOffset: new go.Point(0, -10), // Ajusta la posición
+                    font: '10pt sans-serif',
+                    editable: true, // Permite editar en el diagrama
+                }).bind(new go.Binding('text', 'linkName').makeTwoWay()),
             )
     );
 
-
-    // Crear enlace Directed Association, es un enlace que contiene una flecha abierta en el extremo del destino
-    myDiagram.linkTemplateMap.add('DirectedAssociation',
+    myDiagram.linkTemplateMap.add('AssociationManyToMany',
         new go.Link({
+            reshapable: true,
+            resegmentable: true,
             ...linkStyle(),
             selectable: true,
             relinkableFrom: true,
             relinkableTo: true,
-            reshapable: true, // Habilitar redimensionamiento
-            contextClick: (e, link) => {
-                e.diagram.model.commit((m) => {
-                    m.set(link.data, 'text', 'Label');
-                });
-            }
+
         })
             .add(
-                new go.Shape(),
-                new go.Shape({ toArrow: 'OpenTriangle' }),
-                // the link label
-                new go.Panel('Auto', { visible: false })
-                    .bind('visible', 'text', (t) => typeof t === 'string' && t.length > 0) // solo mostrado si hay texto
-                    .add(
-                        // Un fondo blanco para la etiqueta
-                        new go.Shape('Rectangle', {
-                            fill: 'white', // Color de fondo blanco
-                            stroke: null, // Sin borde
-                            opacity: 0.5 // Opcional: ajusta la opacidad
-                        }),
-                        new go.TextBlock({
-                            name: 'LABEL',
-                            font: '9pt Figtree, sans-serif',
-                            margin: 3,
-                            editable: true
-                        })
-                            .theme('stroke', 'bgText')
-                            .bindTwoWay('text')
-                    )
+                new go.Shape({
+                    stroke: 'black',
+                    strokeWidth: 2,
+                }),
             )
+            // Multiplicidad en el extremo "from"
+            .add(
+                new go.TextBlock({
+                    text: '*', // Valor inicial de multiplicidad
+                    segmentIndex: 0, // Inicio del enlace
+                    segmentOffset: new go.Point(15, -10), // Ajusta la posición
+                    font: '10pt sans-serif',
+                    editable: true, // Permite editar en el diagrama
+                }).bind(new go.Binding('text', 'fromMultiplicity').makeTwoWay()),
+            )
+            // Multiplicidad en el extremo "to"
+            .add(
+                new go.TextBlock({
+                    text: '*', // Valor inicial de multiplicidad
+                    segmentIndex: -1, // Fin del enlace
+                    segmentOffset: new go.Point(-15, -10), // Ajusta la posición
+                    font: '10pt sans-serif',
+                    editable: true, // Permite editar en el diagrama
+                }).bind(new go.Binding('text', 'toMultiplicity').makeTwoWay()),
+            )
+
     );
 
-    // Crear enlace Aggregation, es un enlace que contiene una flecha de diamante en el extremo del origen
     myDiagram.linkTemplateMap.add('Aggregation',
         new go.Link({
+            reshapable: true,
+            resegmentable: true,
             ...linkStyle(),
             selectable: true,
             relinkableFrom: true,
             relinkableTo: true,
-            reshapable: true, // Habilitar redimensionamiento
-            contextClick: (e, link) => {
-                e.diagram.model.commit((m) => {
-                    m.set(link.data, 'text', 'Label');
-                });
-            }
         })
             .add(
-                new go.Shape(),
-                new go.Shape({ fromArrow: 'StretchedDiamond', fill: 'white', scale: 1.3 }),
-                new go.Shape({ toArrow: 'OpenTriangle' }),
-                // the link label
-                new go.Panel('Auto', { visible: false })
-                    .bind('visible', 'text', (t) => typeof t === 'string' && t.length > 0) // solo mostrado si hay texto
-                    .add(
-                        // Un fondo blanco para la etiqueta
-                        new go.Shape('Rectangle', {
-                            fill: 'white', // Color de fondo blanco
-                            stroke: null, // Sin borde
-                            opacity: 0.5 // Opcional: ajusta la opacidad
-                        }),
-                        new go.TextBlock({
-                            name: 'LABEL',
-                            font: '9pt Figtree, sans-serif',
-                            margin: 3,
-                            editable: true
-                        })
-                            .theme('stroke', 'bgText')
-                            .bindTwoWay('text')
-                    )
+                new go.Shape({
+                    stroke: 'black',
+                    strokeWidth: 2,
+                }),
+            )
+            // Diamante en el extremo "from" para representar la agregación
+            .add(
+                new go.Shape({
+                    fromArrow: 'StretchedDiamond',
+                    fill: 'white', // Diamante vacío
+                    stroke: 'black',
+                    strokeWidth: 1.5,
+                    scale: 2, // Escala del diamante (ajusta según sea necesario)
+                }),
+            )
+            // Multiplicidad en el extremo "from"
+            .add(
+                new go.TextBlock({
+                    text: '', // Valor inicial de multiplicidad
+                    segmentIndex: 0, // Inicio del enlace
+                    segmentOffset: new go.Point(30, -10), // Ajusta la posición
+                    font: '10pt sans-serif',
+                    editable: true, // Permite editar en el diagrama
+                }).bind(new go.Binding('text', 'fromMultiplicity').makeTwoWay()),
+            )
+            // Multiplicidad en el extremo "to"
+            .add(
+                new go.TextBlock({
+                    text: '', // Valor inicial de multiplicidad
+                    segmentIndex: -1, // Fin del enlace
+                    segmentOffset: new go.Point(-15, -10), // Ajusta la posición
+                    font: '10pt sans-serif',
+                    editable: true, // Permite editar en el diagrama
+                }).bind(new go.Binding('text', 'toMultiplicity').makeTwoWay()),
+            )
+            // Nombre en el centro del enlace
+            .add(
+                new go.TextBlock({
+                    text: 'Relation', // Valor inicial del nombre
+                    segmentFraction: 0.5, // Posición en el centro del enlace
+                    segmentOffset: new go.Point(0, -10), // Ajusta la posición
+                    font: '10pt sans-serif',
+                    editable: true, // Permite editar en el diagrama
+                }).bind(new go.Binding('text', 'linkName').makeTwoWay()),
             )
     );
 
-    // Crear enlace Composition, es un enlace que contiene una flecha de diamante oscuro en el extremo del origen
     myDiagram.linkTemplateMap.add('Composition',
         new go.Link({
+            reshapable: true,
+            resegmentable: true,
             ...linkStyle(),
             selectable: true,
             relinkableFrom: true,
             relinkableTo: true,
-            reshapable: true, // Habilitar redimensionamiento
-            contextClick: (e, link) => {
-                e.diagram.model.commit((m) => {
-                    m.set(link.data, 'text', 'Label');
-                });
-            }
         })
             .add(
-                new go.Shape(),
-                new go.Shape({ fromArrow: 'StretchedDiamond', scale: 1.3 }),
-                new go.Shape({ toArrow: 'OpenTriangle' }),
-                // the link label
-                new go.Panel('Auto', { visible: false })
-                    .bind('visible', 'text', (t) => typeof t === 'string' && t.length > 0) // solo mostrado si hay texto
-                    .add(
-                        // Un fondo blanco para la etiqueta
-                        new go.Shape('Rectangle', {
-                            fill: 'white', // Color de fondo blanco
-                            stroke: null, // Sin borde
-                            opacity: 0.5 // Opcional: ajusta la opacidad
-                        }),
-                        new go.TextBlock({
-                            name: 'LABEL',
-                            font: '9pt Figtree, sans-serif',
-                            margin: 3,
-                            editable: true
-                        })
-                            .theme('stroke', 'bgText')
-                            .bindTwoWay('text')
-                    )
+                new go.Shape({
+                    stroke: 'black',
+                    strokeWidth: 2,
+                }),
+            )
+            // Diamante en el extremo "from" para representar la agregación
+            .add(
+                new go.Shape({
+                    fromArrow: 'StretchedDiamond',
+                    fill: 'black', // Diamante vacío
+                    stroke: 'black',
+                    strokeWidth: 1.5,
+                    scale: 2, // Escala del diamante (ajusta según sea necesario)
+                }),
+            )
+            // Multiplicidad en el extremo "from"
+            .add(
+                new go.TextBlock({
+                    text: '', // Valor inicial de multiplicidad
+                    segmentIndex: 0, // Inicio del enlace
+                    segmentOffset: new go.Point(30, -10), // Ajusta la posición
+                    font: '10pt sans-serif',
+                    editable: true, // Permite editar en el diagrama
+                }).bind(new go.Binding('text', 'fromMultiplicity').makeTwoWay()),
+            )
+            // Multiplicidad en el extremo "to"
+            .add(
+                new go.TextBlock({
+                    text: '', // Valor inicial de multiplicidad
+                    segmentIndex: -1, // Fin del enlace
+                    segmentOffset: new go.Point(-15, -10), // Ajusta la posición
+                    font: '10pt sans-serif',
+                    editable: true, // Permite editar en el diagrama
+                }).bind(new go.Binding('text', 'toMultiplicity').makeTwoWay()),
+            )
+            // Nombre en el centro del enlace
+            .add(
+                new go.TextBlock({
+                    text: 'Relation', // Valor inicial del nombre
+                    segmentFraction: 0.5, // Posición en el centro del enlace
+                    segmentOffset: new go.Point(0, -10), // Ajusta la posición
+                    font: '10pt sans-serif',
+                    editable: true, // Permite editar en el diagrama
+                }).bind(new go.Binding('text', 'linkName').makeTwoWay()),
             )
     );
 
-    // Crear enlace Dependency, es un enlace punteado que contiene una flecha de punta abierta en el extremo del destino
-    myDiagram.linkTemplateMap.add('Dependency',
-        new go.Link({
-            ...linkStyle(),
-            selectable: true,
-            relinkableFrom: true,
-            relinkableTo: true,
-            reshapable: true, // Habilitar redimensionamiento
-            contextClick: (e, link) => {
-                e.diagram.model.commit((m) => {
-                    m.set(link.data, 'text', 'Label');
-                });
-            }
-        })
-            .add(
-                new go.Shape({ strokeDashArray: [3, 2] }),
-                new go.Shape({ toArrow: 'OpenTriangle' }),
-                // the link label
-                new go.Panel('Auto', { visible: false })
-                    .bind('visible', 'text', (t) => typeof t === 'string' && t.length > 0) // solo mostrado si hay texto
-                    .add(
-                        // Un fondo blanco para la etiqueta
-                        new go.Shape('Rectangle', {
-                            fill: 'white', // Color de fondo blanco
-                            stroke: null, // Sin borde
-                            opacity: 0.5 // Opcional: ajusta la opacidad
-                        }),
-                        new go.TextBlock({
-                            name: 'LABEL',
-                            font: '9pt Figtree, sans-serif',
-                            margin: 3,
-                            editable: true
-                        })
-                            .theme('stroke', 'bgText')
-                            .bindTwoWay('text')
-                    )
-            )
-    );
-
-    // Crear enlace Generalization, es un enlace que contiene una flecha de punta abierta en el extremo del destino
     myDiagram.linkTemplateMap.add('Generalization',
         new go.Link({
+            reshapable: true,
+            resegmentable: true,
             ...linkStyle(),
             selectable: true,
             relinkableFrom: true,
             relinkableTo: true,
-            reshapable: true, // Habilitar redimensionamiento
-            contextClick: (e, link) => {
-                e.diagram.model.commit((m) => {
-                    m.set(link.data, 'text', 'Label');
-                });
-            }
         })
             .add(
-                new go.Shape(),
-                new go.Shape({ toArrow: 'Triangle', fill: 'white' }),
-                // the link label
-                new go.Panel('Auto', { visible: false })
-                    .bind('visible', 'text', (t) => typeof t === 'string' && t.length > 0) // solo mostrado si hay texto
-                    .add(
-                        // Un fondo blanco para la etiqueta
-                        new go.Shape('Rectangle', {
-                            fill: 'white', // Color de fondo blanco
-                            stroke: null, // Sin borde
-                            opacity: 0.5 // Opcional: ajusta la opacidad
-                        }),
-                        new go.TextBlock({
-                            name: 'LABEL',
-                            font: '9pt Figtree, sans-serif',
-                            margin: 3,
-                            editable: true
-                        })
-                            .theme('stroke', 'bgText')
-                            .bindTwoWay('text')
-                    )
+                new go.Shape({
+                    stroke: 'black',
+                    strokeWidth: 2,
+                }),
+            )
+            // Flecha de triángulo en el extremo "to" para representar la generalización
+            .add(
+                new go.Shape({
+                    toArrow: 'Triangle',
+                    fill: 'white', // Triángulo vacío
+                    stroke: 'black',
+                    strokeWidth: 1.5,
+                    scale: 1.5, // Escala del triángulo (ajusta según sea necesario)
+                }),
+            )
+            // Multiplicidad en el extremo "from"
+            .add(
+                new go.TextBlock({
+                    text: '', // Valor inicial de multiplicidad
+                    segmentIndex: 0, // Inicio del enlace
+                    segmentOffset: new go.Point(15, -10), // Ajusta la posición
+                    font: '10pt sans-serif',
+                    editable: true, // Permite editar en el diagrama
+                }).bind(new go.Binding('text', 'fromMultiplicity').makeTwoWay()),
+            )
+            // Multiplicidad en el extremo "to"
+            .add(
+                new go.TextBlock({
+                    text: '', // Valor inicial de multiplicidad
+                    segmentIndex: -1, // Fin del enlace
+                    segmentOffset: new go.Point(-20, -10), // Ajusta la posición
+                    font: '10pt sans-serif',
+                    editable: true, // Permite editar en el diagrama
+                }).bind(new go.Binding('text', 'toMultiplicity').makeTwoWay()),
+            )
+            // Nombre en el centro del enlace
+            .add(
+                new go.TextBlock({
+                    text: 'Generalization', // Valor inicial del nombre
+                    segmentFraction: 0.5, // Posición en el centro del enlace
+                    segmentOffset: new go.Point(0, -10), // Ajusta la posición
+                    font: '10pt sans-serif',
+                    editable: true, // Permite editar en el diagrama
+                }).bind(new go.Binding('text', 'linkName').makeTwoWay()),
             )
     );
 
     myDiagram.linkTemplateMap.add('Realization',
         new go.Link({
+            reshapable: true,
+            resegmentable: true,
             ...linkStyle(),
             selectable: true,
             relinkableFrom: true,
             relinkableTo: true,
-            reshapable: true, // Habilitar redimensionamiento
-            contextClick: (e, link) => {
-                e.diagram.model.commit((m) => {
-                    m.set(link.data, 'text', 'Label');
-                });
-            }
         })
             .add(
-                new go.Shape({ strokeDashArray: [3, 2] }),
-                new go.Shape({ toArrow: 'Triangle', fill: 'white' }),
-                // the link label
-                new go.Panel('Auto', { visible: false })
-                    .bind('visible', 'text', (t) => typeof t === 'string' && t.length > 0) // solo mostrado si hay texto
-                    .add(
-                        // Un fondo blanco para la etiqueta
-                        new go.Shape('Rectangle', {
-                            fill: 'white', // Color de fondo blanco
-                            stroke: null, // Sin borde
-                            opacity: 0.5 // Opcional: ajusta la opacidad
-                        }),
-                        new go.TextBlock({
-                            name: 'LABEL',
-                            font: '9pt Figtree, sans-serif',
-                            margin: 3,
-                            editable: true
-                        })
-                            .theme('stroke', 'bgText')
-                            .bindTwoWay('text')
-                    )
+                new go.Shape({
+                    stroke: 'black',
+                    strokeWidth: 2,
+                }),
+            )
+            // Flecha de triángulo en el extremo "to" para representar la generalización
+            .add(
+                new go.Shape({
+                    toArrow: 'Triangle',
+                    fill: 'black', // Triángulo vacío
+                    stroke: 'black',
+                    strokeWidth: 1.5,
+                    scale: 1.5, // Escala del triángulo (ajusta según sea necesario)
+                }),
+            )
+            // Multiplicidad en el extremo "from"
+            .add(
+                new go.TextBlock({
+                    text: '', // Valor inicial de multiplicidad
+                    segmentIndex: 0, // Inicio del enlace
+                    segmentOffset: new go.Point(15, -10), // Ajusta la posición
+                    font: '10pt sans-serif',
+                    editable: true, // Permite editar en el diagrama
+                }).bind(new go.Binding('text', 'fromMultiplicity').makeTwoWay()),
+            )
+            // Multiplicidad en el extremo "to"
+            .add(
+                new go.TextBlock({
+                    text: '', // Valor inicial de multiplicidad
+                    segmentIndex: -1, // Fin del enlace
+                    segmentOffset: new go.Point(-20, -10), // Ajusta la posición
+                    font: '10pt sans-serif',
+                    editable: true, // Permite editar en el diagrama
+                }).bind(new go.Binding('text', 'toMultiplicity').makeTwoWay()),
+            )
+            // Nombre en el centro del enlace
+            .add(
+                new go.TextBlock({
+                    text: 'Realization', // Valor inicial del nombre
+                    segmentFraction: 0.5, // Posición en el centro del enlace
+                    segmentOffset: new go.Point(0, -10), // Ajusta la posición
+                    font: '10pt sans-serif',
+                    editable: true, // Permite editar en el diagrama
+                }).bind(new go.Binding('text', 'linkName').makeTwoWay()),
             )
     );
+
+    myDiagram.linkTemplateMap.add('Dependency',
+        new go.Link({
+            reshapable: true,
+            resegmentable: true,
+            ...linkStyle(),
+            selectable: true,
+            relinkableFrom: true,
+            relinkableTo: true,
+        })
+            .add(
+                new go.Shape({
+                    stroke: 'black',
+                    strokeWidth: 2,
+                    strokeDashArray: [4, 2] // Línea discontinua
+                }),
+            )
+            // Flecha en el extremo "to" para representar la dependencia
+            .add(
+                new go.Shape({
+                    toArrow: 'OpenTriangle',
+                    fill: 'white', // Triángulo vacío
+                    stroke: 'black',
+                    strokeWidth: 1.5,
+                    scale: 1.5, // Escala del triángulo (ajusta según sea necesario)
+                }),
+            )
+            // Multiplicidad en el extremo "from"
+            .add(
+                new go.TextBlock({
+                    text: '', // Valor inicial de multiplicidad
+                    segmentIndex: 0, // Inicio del enlace
+                    segmentOffset: new go.Point(15, -10), // Ajusta la posición
+                    font: '10pt sans-serif',
+                    editable: true, // Permite editar en el diagrama
+                }).bind(new go.Binding('text', 'fromMultiplicity').makeTwoWay()),
+            )
+            // Multiplicidad en el extremo "to"
+            .add(
+                new go.TextBlock({
+                    text: '', // Valor inicial de multiplicidad
+                    segmentIndex: -1, // Fin del enlace
+                    segmentOffset: new go.Point(-15, -10), // Ajusta la posición
+                    font: '10pt sans-serif',
+                    editable: true, // Permite editar en el diagrama
+                }).bind(new go.Binding('text', 'toMultiplicity').makeTwoWay()),
+            )
+            // Nombre en el centro del enlace
+            .add(
+                new go.TextBlock({
+                    text: 'Dependency', // Valor inicial del nombre
+                    segmentFraction: 0.5, // Posición en el centro del enlace
+                    segmentOffset: new go.Point(0, -10), // Ajusta la posición
+                    font: '10pt sans-serif',
+                    editable: true, // Permite editar en el diagrama
+                }).bind(new go.Binding('text', 'linkName').makeTwoWay()),
+            )
+    );
+
+
 
     // Plantilla para los enlaces de la paleta
-    myPalette.linkTemplate = new go.Link({
-        locationSpot: go.Spot.Center,  // Ubicación del enlace en la paleta
-        routing: go.Routing.AvoidsNodes,  // Evitar los nodos
-        curve: go.Curve.JumpOver,  // Curvatura con salto sobre otros enlaces
-        corner: 5,
-        toShortLength: 4
-    })
-        .bind('points')
-        .add(
-            new go.Shape({ isPanelMain: true, strokeWidth: 2 }),  // Forma del enlace
-            new go.Shape({ toArrow: 'Standard', stroke: null })  // Flecha del enlace
-        );
-
-
-    // Crear un enlace Association con texto
     myPalette.linkTemplateMap.add('Association',
         new go.Link({
-            ...linkStyle(),
-            selectable: true,
-            relinkableFrom: true,
-            relinkableTo: true,
-            reshapable: true, // Habilitar redimensionamient
+            locationSpot: go.Spot.Center,
+            selectionAdornmentTemplate: new go.Adornment('Link', {
+                locationSpot: go.Spot.Center
+            }),
+            routing: go.Routing.AvoidsNodes,
+            curve: go.Curve.JumpOver,
+            corner: 5,
+            toShortLength: 4
         })
             .bind('points')
             .add(
-                new go.Shape(), // Forma del enlace
+                new go.Shape({ // the link path shape
+                    isPanelMain: true,
+                    strokeWidth: 2
+                }),
             )
-    );
-
-    // Crear enlace Directed Association, es un enlace que contiene una flecha abierta en el extremo del destino
-    myPalette.linkTemplateMap.add('DirectedAssociation',
-        new go.Link({
-            ...linkStyle(),
-            selectable: true,
-            relinkableFrom: true,
-            relinkableTo: true,
-            reshapable: true, // Habilitar redimensionamiento
-
-        })
-            .bind('points')
-
+            // Texto en la punta del enlace
             .add(
-                new go.Shape(),
-                new go.Shape({ toArrow: 'OpenTriangle' }),
+                new go.TextBlock({
+                    text: 'Asociación', // Valor inicial del texto
+                    segmentIndex: -1, // Posición en la punta del enlace
+                    segmentOffset: new go.Point(-10, 18), // Ajusta la posición para estar en la punta del enlace
+                    font: '10pt sans-serif',
+                    editable: true, // Permite editar en el diagrama
+                }).bind(new go.Binding('text', 'linkName').makeTwoWay()),
             )
     );
 
-    // Crear enlace Aggregation, es un enlace que contiene una flecha de diamante en el extremo del origen
     myPalette.linkTemplateMap.add('Aggregation',
         new go.Link({
-            ...linkStyle(),
-            selectable: true,
-            relinkableFrom: true,
-            relinkableTo: true,
-            reshapable: true, // Habilitar redimensionamiento
+            locationSpot: go.Spot.Center,
+            selectionAdornmentTemplate: new go.Adornment('Link', {
+                locationSpot: go.Spot.Center
+            }),
+            routing: go.Routing.AvoidsNodes,
+            curve: go.Curve.JumpOver,
+            corner: 5,
+            toShortLength: 4
         })
             .bind('points')
-
             .add(
-                new go.Shape(),
-                new go.Shape({ fromArrow: 'StretchedDiamond', fill: 'white', scale: 1.3 }),
-                new go.Shape({ toArrow: 'OpenTriangle' }),
+                new go.Shape({ // the link path shape
+                    isPanelMain: true,
+                    strokeWidth: 2
+                }),
+            )
+            // Diamante en el extremo "from" para representar la agregación
+            .add(
+                new go.Shape({
+                    fromArrow: 'Diamond',
+                    fill: 'white', // Diamante vacío
+                    stroke: 'black',
+                    strokeWidth: 2,
+                    scale: 1.5, // Escala del diamante (ajusta según sea necesario)
+                }),
+            )
+            // Texto en la punta del enlace
+            .add(
+                new go.TextBlock({
+                    text: 'Agregación', // Valor inicial del texto
+                    segmentIndex: -1, // Posición en la punta del enlace
+                    segmentOffset: new go.Point(-10, 18), // Ajusta la posición para estar en la punta del enlace
+                    font: '10pt sans-serif',
+                    editable: true, // Permite editar en el diagrama
+                }).bind(new go.Binding('text', 'linkName').makeTwoWay()),
             )
     );
 
-    // Crear enlace Composition, es un enlace que contiene una flecha de diamante oscuro en el extremo del origen
     myPalette.linkTemplateMap.add('Composition',
         new go.Link({
-            ...linkStyle(),
+            locationSpot: go.Spot.Center,
+            selectionAdornmentTemplate: new go.Adornment('Link', {
+                locationSpot: go.Spot.Center
+            }),
+            routing: go.Routing.AvoidsNodes,
+            curve: go.Curve.JumpOver,
+            corner: 5,
+            toShortLength: 4,
             selectable: true,
             relinkableFrom: true,
             relinkableTo: true,
-            reshapable: true, // Habilitar redimensionamiento
+            reshapable: true,
+            resegmentable: true,
         })
             .bind('points')
-
             .add(
-                new go.Shape(),
-                new go.Shape({ fromArrow: 'StretchedDiamond', scale: 1.3 }),
-                new go.Shape({ toArrow: 'OpenTriangle' }),
+                new go.Shape({ // the link path shape
+                    isPanelMain: true,
+                    strokeWidth: 2
+                }),
+            )
+            // Diamante relleno en el extremo "from" para representar la composición
+            .add(
+                new go.Shape({
+                    fromArrow: 'Diamond',
+                    fill: 'black', // Diamante relleno
+                    stroke: 'black',
+                    strokeWidth: 2,
+                    scale: 1.5, // Escala del diamante (ajusta según sea necesario)
+                }),
+            )
+            // Texto en la punta del enlace
+            .add(
+                new go.TextBlock({
+                    text: 'Composición', // Valor inicial del texto
+                    segmentIndex: -1, // Posición en la punta del enlace
+                    segmentOffset: new go.Point(-10, 18), // Ajusta la posición para estar en la punta del enlace
+                    font: '10pt sans-serif',
+                    editable: true, // Permite editar en el diagrama
+                }).bind(new go.Binding('text', 'linkName').makeTwoWay()),
             )
     );
 
-    // Crear enlace Dependency, es un enlace punteado que contiene una flecha de punta abierta en el extremo del destino
-    myPalette.linkTemplateMap.add('Dependency',
-        new go.Link({
-            ...linkStyle(),
-            selectable: true,
-            relinkableFrom: true,
-            relinkableTo: true,
-            reshapable: true, // Habilitar redimensionamiento
-        })
-            .bind('points')
-
-            .add(
-                new go.Shape({ strokeDashArray: [3, 2] }),
-                new go.Shape({ toArrow: 'OpenTriangle' }),
-            )
-    );
-
-    // Crear enlace Generalization, es un enlace que contiene una flecha de punta abierta en el extremo del destino
     myPalette.linkTemplateMap.add('Generalization',
         new go.Link({
-            ...linkStyle(),
+            locationSpot: go.Spot.Center,
+            selectionAdornmentTemplate: new go.Adornment('Link', {
+                locationSpot: go.Spot.Center
+            }),
+            routing: go.Routing.AvoidsNodes,
+            curve: go.Curve.JumpOver,
+            corner: 5,
+            toShortLength: 4,
             selectable: true,
             relinkableFrom: true,
             relinkableTo: true,
-            reshapable: true, // Habilitar redimensionamiento
+            reshapable: true,
+            resegmentable: true,
         })
             .bind('points')
-
             .add(
-                new go.Shape(),
-                new go.Shape({ toArrow: 'Triangle', fill: 'white' }),
+                new go.Shape({ // the link path shape
+                    isPanelMain: true,
+                    strokeWidth: 2
+                }),
+            )
+            // Flecha de triángulo en el extremo "to" para representar la generalización
+            .add(
+                new go.Shape({
+                    toArrow: 'Triangle',
+                    fill: 'white', // Triángulo vacío
+                    stroke: 'black',
+                    strokeWidth: 2,
+                    scale: 1.5, // Escala del triángulo (ajusta según sea necesario)
+                }),
+            )
+            // Texto en la punta del enlace
+            .add(
+                new go.TextBlock({
+                    text: 'Generalización', // Valor inicial del texto
+                    segmentIndex: -1, // Posición en la punta del enlace
+                    segmentOffset: new go.Point(-10, 18), // Ajusta la posición para estar en la punta del enlace
+                    font: '10pt sans-serif',
+                    editable: true, // Permite editar en el diagrama
+                }).bind(new go.Binding('text', 'linkName').makeTwoWay()),
             )
     );
 
     myPalette.linkTemplateMap.add('Realization',
         new go.Link({
-            ...linkStyle(),
+            locationSpot: go.Spot.Center,
+            selectionAdornmentTemplate: new go.Adornment('Link', {
+                locationSpot: go.Spot.Center
+            }),
+            routing: go.Routing.AvoidsNodes,
+            curve: go.Curve.JumpOver,
+            corner: 5,
+            toShortLength: 4,
             selectable: true,
             relinkableFrom: true,
             relinkableTo: true,
-            reshapable: true, // Habilitar redimensionamiento
+            reshapable: true,
+            resegmentable: true,
         })
             .bind('points')
-
             .add(
-                new go.Shape({ strokeDashArray: [3, 2] }),
-                new go.Shape({ toArrow: 'Triangle', fill: 'white' }),
+                new go.Shape({ // the link path shape
+                    isPanelMain: true,
+                    strokeWidth: 2,
+                    strokeDashArray: [4, 2] // Línea discontinua
+                }),
+            )
+            // Flecha de triángulo rellena en el extremo "to" para representar la realización
+            .add(
+                new go.Shape({
+                    toArrow: 'Triangle',
+                    fill: 'black', // Triángulo relleno
+                    stroke: 'black',
+                    strokeWidth: 2,
+                    scale: 1.5, // Escala del triángulo (ajusta según sea necesario)
+                }),
+            )
+            // Texto en la punta del enlace
+            .add(
+                new go.TextBlock({
+                    text: 'Realización', // Valor inicial del texto
+                    segmentIndex: -1, // Posición en la punta del enlace
+                    segmentOffset: new go.Point(-10, 18), // Ajusta la posición para estar en la punta del enlace
+                    font: '10pt sans-serif',
+                    editable: true, // Permite editar en el diagrama
+                }).bind(new go.Binding('text', 'linkName').makeTwoWay()),
             )
     );
 
+    myPalette.linkTemplateMap.add('Dependency',
+        new go.Link({
+            locationSpot: go.Spot.Center,
+            selectionAdornmentTemplate: new go.Adornment('Link', {
+                locationSpot: go.Spot.Center
+            }),
+            routing: go.Routing.AvoidsNodes,
+            curve: go.Curve.JumpOver,
+            corner: 5,
+            toShortLength: 4,
+            selectable: true,
+            relinkableFrom: true,
+            relinkableTo: true,
+            reshapable: true,
+            resegmentable: true,
+        })
+            .bind('points')
+            .add(
+                new go.Shape({ // the link path shape
+                    isPanelMain: true,
+                    strokeWidth: 2,
+                    strokeDashArray: [4, 2] // Línea discontinua
+                }),
+            )
+            // Flecha de triángulo vacío en el extremo "to" para representar la dependencia
+            .add(
+                new go.Shape({
+                    toArrow: 'OpenTriangle',
+                    fill: 'white', // Triángulo vacío
+                    stroke: 'black',
+                    strokeWidth: 2,
+                    scale: 1.5, // Escala del triángulo (ajusta según sea necesario)
+                }),
+            )
+            // Texto en la punta del enlace
+            .add(
+                new go.TextBlock({
+                    text: 'Dependencia', // Valor inicial del texto
+                    segmentIndex: -1, // Posición en la punta del enlace
+                    segmentOffset: new go.Point(-10, 18), // Ajusta la posición para estar en la punta del enlace
+                    font: '10pt sans-serif',
+                    editable: true, // Permite editar en el diagrama
+                }).bind(new go.Binding('text', 'linkName').makeTwoWay()),
+            )
+    );
 
     myPalette.model.linkCategoryProperty = "relationship";  // Esto es correcto
 
@@ -454,14 +677,23 @@ function init(/*dataModel*/) {
         ],
         [
             // Definición de los diferentes tipos de enlaces en la paleta
-            { category: 'Association', relationship: 'Association', points: new go.List().addAll([new go.Point(0, 0), new go.Point(60, 40)]) },
-            { category: 'DirectedAssociation', relationship: 'DirectedAssociation', points: new go.List().addAll([new go.Point(0, 0), new go.Point(60, 40)]) },
-            { category: 'Aggregation', relationship: 'Aggregation', points: new go.List().addAll([new go.Point(0, 0), new go.Point(60, 40)]) },
-            { category: 'Composition', relationship: 'Composition', points: new go.List().addAll([new go.Point(0, 0), new go.Point(60, 40)]) },
-            { category: 'Dependency', relationship: 'Dependency', points: new go.List().addAll([new go.Point(0, 0), new go.Point(60, 40)]) },
-            { category: 'Generalization', relationship: 'Generalization', points: new go.List().addAll([new go.Point(0, 0), new go.Point(60, 40)]) },
+            { category: 'Association', relationship: 'Association', points: new go.List(/*go.Point*/).addAll([new go.Point(0, 0), new go.Point(30, 0), new go.Point(30, 40), new go.Point(60, 40)]) },
+            { category: 'Aggregation', relationship: 'Aggregation', points: new go.List(/*go.Point*/).addAll([new go.Point(0, 0), new go.Point(30, 0), new go.Point(30, 40), new go.Point(60, 40)]) },
+            { category: 'Composition', relationship: 'Composition', points: new go.List(/*go.Point*/).addAll([new go.Point(0, 0), new go.Point(30, 0), new go.Point(30, 40), new go.Point(60, 40)]) },
+            { category: 'Generalization', relationship: 'Generalization', points: new go.List(/*go.Point*/).addAll([new go.Point(0, 0), new go.Point(30, 0), new go.Point(30, 40), new go.Point(60, 40)]) },
+            { category: 'Realization', relationship: 'Realization', points: new go.List(/*go.Point*/).addAll([new go.Point(0, 0), new go.Point(30, 0), new go.Point(30, 40), new go.Point(60, 40)]) },
+            { category: 'Dependency', relationship: 'Dependency', points: new go.List(/*go.Point*/).addAll([new go.Point(0, 0), new go.Point(30, 0), new go.Point(30, 40), new go.Point(60, 40)]) },
         ]
     );
+
+    myDiagram.addDiagramListener('LinkDrawn', function (e) {
+        const link = e.subject.part.data;
+
+        if (link.fromMultiplicity === '*' || link.toMultiplicity === '*') {
+            //addIntermediateClass(link);
+            console.log("Se ha dibujado un enlace con multiplicidad *");
+        }
+    });
 
     // We don't want the div acting as a context menu to have a (browser) context menu!
     cxElement.addEventListener(
@@ -590,7 +822,12 @@ function saveDB() {
 }
 
 function exportarArchitect() {
-    var json = myDiagram.model.toJson();
+    //var json = myDiagram.model.toJson();
+    const json = JSON.parse(myDiagram.model.toJson());
+    //descargarArchivoXMI(json);
+    exportXML(json);
+
+    return;
     var xml = jsonToUmlXml(json);
 
     // Descargar el archivo XML

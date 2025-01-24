@@ -1,4 +1,5 @@
 import { convertVisibility } from './helpers.js';
+import OrthogonalLinkReshapingTool from './OrthogonalLinkReshapingTool.js';
 
 export function initializeDiagram() {
     return new go.Diagram('myDiagramDiv', {
@@ -30,6 +31,7 @@ export function initializeDiagram() {
         'linkingTool.portGravity': 20,
         'relinkingTool.isUnconnectedLinkValid': true,
         'relinkingTool.portGravity': 20,
+        linkReshapingTool: new OrthogonalLinkReshapingTool()
     });
 }
 
