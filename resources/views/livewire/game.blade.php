@@ -67,10 +67,10 @@ new class extends Component {
 
 <div>
     <div class="row no-gutter flex-grow-1 justify-content-center" style="height: 82vh;">
-        <div class="col-md-1 d-flex no-padding" style="background-color:  #e4e7ea;">
+        <div class="col-md-2 d-flex no-padding" style="background-color:  #e4e7ea;">
             <div id="myPaletteDiv" style="border: solid 1px black; border-right: 0; width:100%; height:100%;"></div>
         </div>
-        <div class="col-md-11 d-flex no-padding">
+        <div class="col-md-10 d-flex no-padding">
             <div style="display: flex; width: 100%; height: 100%;">
                 <div style="position: relative; width: 100%; height: 100%;">
                     <div id="myDiagramDiv" style="border: solid 1px black; width: 100%; height: 100%;"></div>
